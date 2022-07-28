@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../components/shared/json_handler.dart';
+import '../components/shared/local_storage.dart';
 
 class SetupRoutine extends StatefulWidget {
   SetupRoutine({Key? key}) : super(key: key);
@@ -14,7 +14,7 @@ class SetupRoutine extends StatefulWidget {
 }
 
 class _SetupRoutineState extends State<SetupRoutine> {
-  late JsonHandler jsonHandler;
+  late LocalStorage jsonHandler;
 
   // UNCOMMENT
 
@@ -37,23 +37,12 @@ class _SetupRoutineState extends State<SetupRoutine> {
   void initState() {
     super.initState();
 
-    // UNCOMMENT
-
-    // getApplicationDocumentsDirectory().then((Directory directory) {
-    //   dir = directory;
-    //   weekJsonFile = File(dir.path + "/" + weekFileName);
-    //   weekFileExists = weekJsonFile.existsSync();
-    //   fetchWorkouts();
-    //   print("WEEK EXISTS: " + weekFileExists.toString());
-    //   weekFileExists ? fetchWeekSchedule() : createWeekFile();
-    //   print("WEEK SCHED: " + weekSchedule.toString());
-    // });
 
     initAsync();
   }
 
   initAsync() async {
-    jsonHandler = JsonHandler();
+    jsonHandler = LocalStorage();
     await jsonHandler.init();
     jsonHandler.fetchWorkouts();
     setState(() {
@@ -125,9 +114,11 @@ class _SetupRoutineState extends State<SetupRoutine> {
   DropdownMenuItem buildMenuItem(workout) => DropdownMenuItem(
       value: workout["workout_no"], child: Text(workout["workout_no"]));
 
-  Row buildWeekRow() => Row(
+  Wrap buildWeekRow() => Wrap(
+    spacing: 10,
+    runSpacing: 15,
         children: [
-          SizedBox(width: 5),
+          SizedBox(width: 2),
           for (String day in [
             "Sun",
             "Mon",
@@ -137,78 +128,38 @@ class _SetupRoutineState extends State<SetupRoutine> {
             "Fri",
             "Sat"
           ])
-            Column(
-              children: [
-                Center(child: Text(day)),
-                InkWell(
-                  onTap: jsonHandler.weekSchedule[day] == selectedWorkout
-                      ? () => setState(() {
-                            jsonHandler.writeToWeekFile("", day);
-                          })
-                      : () => setState(() {
-                            jsonHandler.writeToWeekFile(selectedWorkout, day);
-                          }),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                    color: jsonHandler.weekSchedule[day] == selectedWorkout
-                        ? Colors.green
-                        : jsonHandler.weekSchedule[day] == ""
-                            ? Colors.grey
-                            : Colors.red,
-                    height: 40,
-                    width: 40,
+            GestureDetector(
+              onTap: jsonHandler.weekSchedule[day] == selectedWorkout
+                  ? () => setState(() {
+                jsonHandler.writeToWeekFile("", day);
+              })
+                  : () => setState(() {
+                jsonHandler.writeToWeekFile(selectedWorkout, day);
+              }),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+                decoration: BoxDecoration(
+                  color: jsonHandler.weekSchedule[day] == selectedWorkout
+                      ? const Color(0xFFC7EDF1)
+                      : jsonHandler.weekSchedule[day] == ""
+                      ? Colors.grey
+                      : Colors.orange,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  day,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: true ? Colors.white : Colors.grey,
                   ),
-                )
-              ],
-            ),
+                ),
+              ),
+            )
+
+
         ],
       );
-
-  // UNCOMMENT
-
-  // Future<void> fetchWorkouts() async {
-  //   setState(() {
-  //     workoutJsonFile = File(dir.path + "/" + workoutsFileName);
-  //     workoutfileExists = workoutJsonFile.existsSync();
-  //     workoutfileExists
-  //         ? workouts = json.decode(workoutJsonFile.readAsStringSync())
-  //         : null;
-  //   });
-  // }
-
-  // Future<void> fetchWeekSchedule() async {
-  //   setState(() {
-  //     weekJsonFile = File(dir.path + "/" + weekFileName);
-  //     weekSchedule = json.decode(weekJsonFile.readAsStringSync());
-  //   });
-  //   // weekJsonFile.delete();
-  //   // print("EXISTS? " + weekJsonFile.existsSync().toString());
-  // }
-
-  // void createWeekFile() {
-  //   print("\n \n Creating file");
-
-  //   Map<String, String> emptyWeek = {
-  //     "Sun": "",
-  //     "Mon": "",
-  //     "Tues": "",
-  //     "Wed": "",
-  //     "Thurs": "",
-  //     "Fri": "",
-  //     "Sat": ""
-  //   };
-
-  //   weekJsonFile.createSync();
-  //   weekFileExists = true;
-  //   weekJsonFile.writeAsStringSync(json.encode(emptyWeek));
-
-  //   fetchWeekSchedule();
-  // }
-
-  // void writeToWeekFile(String workout_no, String day) {
-  //   setState(() {
-  //     weekSchedule[day] = workout_no;
-  //   });
-  //   weekJsonFile.writeAsStringSync(json.encode(weekSchedule));
-  // }
 }
+
+

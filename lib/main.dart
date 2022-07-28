@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/pages/home.dart';
-import 'package:project/test.dart';
+import 'package:project/workout_tracker.dart';
 import 'package:camera/camera.dart';
 
 List<CameraDescription>? cameras;
@@ -26,5 +26,5 @@ git init
 git add .
 git commit -m "first commit"
 git branch -M main
-git remote add origin https://github.com/Halla-yk/grad-project.git
+git remote add origin https://github.com/Halla-yk/graduation_project.git
 git push -u origin main*/

@@ -6,7 +6,7 @@ import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
-class Classifier {
+class Preprocessor {
   late Interpreter _interpreter;
   late ImageProcessor imageProcessor;
   late TensorImage inputImage;
@@ -19,7 +19,7 @@ class Classifier {
 
   int frameNo = 0;
 
-  Classifier({Interpreter? interpreter}) {
+  Preprocessor({Interpreter? interpreter}) {
     loadModel(interpreter: interpreter);
   }
 
@@ -58,8 +58,6 @@ class Classifier {
 
     s.stop();
     frameNo += 1;
-
-    // printDebugData();
     s.reset();
   }
 
@@ -119,6 +117,7 @@ class Classifier {
   runModel() async {
     Map<int, Object> outputs = {0: outputLocations.buffer};
     interpreter.runForMultipleInputs(inputs, outputs);
+
   }
 
   loadModel({Interpreter? interpreter}) async {
@@ -132,27 +131,13 @@ class Classifier {
       print("Error while creating interpreter: $e");
     }
 
-    // var outputTensors = interpreter.getOutputTensors();
-    // var inputTensors = interpreter.getInputTensors();
-    // List<List<int>> _outputShapes = [];
-
-    // outputTensors.forEach((tensor) {
-    //   print("Output Tensor: " + tensor.toString());
-    //   _outputShapes.add(tensor.shape);
-    // });
-    // inputTensors.forEach((tensor) {
-    //   print("Input Tensor: " + tensor.toString());
-    // });
-
-    // print("------------------[A}========================\n" +
-    //     _outputShapes.toString());
-
     outputLocations = TensorBufferFloat([1, 1, 17, 3]);
   }
 
   parseLandmarkData() {
     List outputParsed = [];
     List<double> data = outputLocations.getDoubleList();
+    Map<String,List<int>> map =  <String,List<int>>{};
     List result = [];
     var x, y, c;
 
@@ -163,11 +148,9 @@ class Classifier {
       result.add([x, y, c]);
     }
     outputParsed = result;
-
-    // print("\n");
-    // printWrapped(outputParsed.toString());
-    // print("\n");
-
+    // map['nose'] = result[0];
+    // map['left_eye'] = result[1];
+        print(result.toString());
     return result;
   }
 

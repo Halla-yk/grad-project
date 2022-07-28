@@ -3,28 +3,29 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+//import 'package:project/print.dart';
 import 'dart:isolate';
 
 import 'main.dart';
-import 'utility/classifier.dart';
+import 'utility/preprocessor.dart';
 import 'utility/isolate.dart';
 
 import 'components/shared/exerciseList.dart';
-import 'components/perform_components/utility.dart';
-import 'components/shared/json_handler.dart';
+import 'components/utility/angle.dart';
+import 'components/shared/local_storage.dart';
 import 'components/shared/exercise_handler.dart';
 
-class Test extends StatefulWidget {
-  Test({Key? key}) : super(key: key);
+class WorkoutTracker extends StatefulWidget {
+  WorkoutTracker({Key? key}) : super(key: key);
 
   @override
-  _TestState createState() => _TestState();
+  _WorkoutTrackerState createState() => _WorkoutTrackerState();
 }
 
-class _TestState extends State<Test> {
+class _WorkoutTrackerState extends State<WorkoutTracker> {
   CameraImage? cameraImage;
   CameraController? cameraController;
-  late Classifier classifier;
+  late Preprocessor classifier;
   late IsolateUtils isolate;
 
   bool predicting = false;
@@ -37,7 +38,7 @@ class _TestState extends State<Test> {
   double test_angle2 = 0;
 
   // WORKOUT AND WEEK DATA
-  late JsonHandler jsonHandler;
+  late LocalStorage jsonHandler;
   late List<dynamic> exercise;
   late String workout;
   late var dayToday;
@@ -50,10 +51,10 @@ class _TestState extends State<Test> {
   String exerciseDisplayName = "";
   String imgUrl = "";
   int reps = 0;
-  int sets = 0;
+//  int sets = 0;
 
   int doneReps = 0;
-  int doneSets = 0;
+  //int doneSets = 0;
   var stage = "up";
   bool rest = false;
   int restTime = 0;
@@ -71,9 +72,9 @@ class _TestState extends State<Test> {
     super.initState();
     initAsync();
   }
-
+  //done
   void initAsync() async {
-    jsonHandler = JsonHandler();
+    jsonHandler = LocalStorage();
     await jsonHandler.init();
 
     jsonHandler.workoutfileExists ? jsonHandler.fetchWorkouts() : null;
@@ -86,7 +87,7 @@ class _TestState extends State<Test> {
 
       isolate = IsolateUtils();
       await isolate.start();
-      classifier = Classifier();
+      classifier = Preprocessor();
       classifier.loadModel();
       loadCamera();
     }
@@ -94,9 +95,11 @@ class _TestState extends State<Test> {
     setState(() {
       limbs = handler.limbs;
       targets = handler.targets;
+      print(limbs.toString());
+      print(targets.toString());
     });
   }
-
+  //done
   void fetchDayWorkout() {
     dayToday = jsonHandler.fetchDayToday();
     jsonHandler.fetchWeekSchedule();
@@ -111,6 +114,7 @@ class _TestState extends State<Test> {
       if (dayToday == day) {
         setState(() {
           workout = jsonHandler.weekSchedule[day];
+          // printError(workout);
         });
       }
     }
@@ -129,9 +133,9 @@ class _TestState extends State<Test> {
       imgUrl = exercise[workoutIndex]["exercise_image"];
       exerciseDisplayName = exercise[workoutIndex]["exercise_displayName"];
       reps = exercise[workoutIndex]["reps"];
-      sets = exercise[workoutIndex]["sets"];
+   //   sets = exercise[workoutIndex]["sets"];
       handler = Exercises[exerciseName]!.handler;
-      print(handler);
+      print(handler.toString());
       handler.init();
       limbs = handler.limbs;
       targets = handler.targets;
@@ -144,15 +148,18 @@ class _TestState extends State<Test> {
     });
     getExerciseData();
   }
-
+  //done
   void loadCamera() {
     setState(() {
       cameraController = CameraController(cameras![1], ResolutionPreset.medium);
     });
     cameraController!.initialize().then((value) {
+      /// It is an error to call [setState] unless [mounted] is true.
       if (!mounted) {
         return;
       } else {
+        //Settings for capturing images on iOS and Android is set to always use
+        // the latest image available from the camera and will drop all other images.
         cameraController!.startImageStream((imageStream) {
           createIsolate(imageStream);
         });
@@ -164,59 +171,30 @@ class _TestState extends State<Test> {
     if (predicting == true) {
       return;
     }
-
-    setState(() {
-      predicting = true;
-    });
+    if(mounted) {
+      setState(() {
+        predicting = true;
+      });
+    }
 
     var isolateData = IsolateData(imageStream, classifier.interpreter.address);
     List<dynamic> inferenceResults = await inference(isolateData);
 
-    setState(() {
-      inferences = inferenceResults;
-      predicting = false;
-      initialized = true;
+    if(mounted){
+      setState(() {
+        inferences = inferenceResults;
+        predicting = false;
+        initialized = true;
 
-      List<int> pointA = [inferenceResults[7][0], inferenceResults[7][1]];
-      List<int> pointB = [inferenceResults[5][0], inferenceResults[5][1]];
-      List<int> pointC = [inferenceResults[11][0], inferenceResults[11][1]];
-      test_angle2 = getAngle(pointA, pointB, pointC);
+        // List<int> pointA = [inferenceResults[7][0], inferenceResults[7][1]];
+        // List<int> pointB = [inferenceResults[5][0], inferenceResults[5][1]];
+        // List<int> pointC = [inferenceResults[11][0], inferenceResults[11][1]];
+        // test_angle2 = getAngle(pointA, pointB, pointC);
 
-      int limbsIndex = 0;
+        int limbsIndex = 0;
 
-      //   if (!rest) {
-      //     if (doneSets < sets) {
-      //       if (doneReps < reps) {
-      //         checkLimbs(inferenceResults, limbsIndex);
-      //         isProperForm = isPostureCorrect();
-      //         doReps(inferenceResults);
-      //       } else {
-      //         setState(() {
-      //           doneReps = 0;
-      //           doneSets++;
-      //           rest = true;
-      //           restTime = 30;
-      //         });
-      //       }
-      //     } else {
-      //       setState(() {
-      //         doneSets = 0;
-      //         doneReps = 0;
-      //         nextWorkout();
-      //         rest = true;
-      //         restTime = 60;
-      //       });
-      //     }
-      //   } else {
-      //     setState(() {
-      //       restTime = 0;
-      //       rest = false;
-      //     });
-      //   }
-      // });
-
-      if (!rest) {
-        if (handler.doneSets < sets) {
+        if (!rest) {
+          //  if (handler.doneSets < sets) {
           if (handler.doneReps < reps) {
             handler.checkLimbs(inferenceResults, limbsIndex);
             isProperForm = handler.isPostureCorrect();
@@ -228,32 +206,34 @@ class _TestState extends State<Test> {
             });
           } else {
             handler.doneReps = 0;
-            handler.doneSets++;
+            //handler.doneSets++;
             setState(() {
               doneReps = handler.doneReps;
-              doneSets = handler.doneSets;
+              //   doneSets = handler.doneSets;
+              nextWorkout();
               rest = true;
               restTime = 30;
             });
           }
+          // } else {
+          // handler.doneSets = 0;
+          //    handler.doneReps = 0;
+          //  setState(() {
+          // doneReps = handler.doneReps;
+          // doneSets = handler.doneSets;
+
+          // rest = true;
+          // restTime = 60;
+          //});
+          // }
         } else {
-          handler.doneSets = 0;
-          handler.doneReps = 0;
           setState(() {
-            doneReps = handler.doneReps;
-            doneSets = handler.doneSets;
-            nextWorkout();
-            rest = true;
-            restTime = 60;
+            restTime = 0;
+            rest = false;
           });
         }
-      } else {
-        setState(() {
-          restTime = 0;
-          rest = false;
-        });
-      }
-    });
+      });
+    }
   }
 
   Future<List<dynamic>> inference(IsolateData isolateData) async {
@@ -282,54 +262,55 @@ class _TestState extends State<Test> {
       ),
       body: hasWorkoutsToday
           ? Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(5),
-                  child: initialized
-                      ? Container(
-                          height: MediaQuery.of(context).size.height * 0.7,
-                          width: MediaQuery.of(context).size.width,
-                          child: CustomPaint(
-                            foregroundPainter:
-                                RenderLandmarks(inferences, limbs),
-                            child: !cameraController!.value.isInitialized
-                                ? Container()
-                                : AspectRatio(
-                                    aspectRatio:
-                                        cameraController!.value.aspectRatio,
-                                    child: CameraPreview(cameraController!),
-                                  ),
-                          ),
-                        )
-                      : Container(),
-
-                  // RotatedBox(
-                  //     quarterTurns: 3,
-                  //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
+        children: [
+          Padding(
+            padding: EdgeInsets.all(5),
+            child: initialized
+                ? Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              width: MediaQuery.of(context).size.width,
+              child: CustomPaint(
+                foregroundPainter:
+                RenderLandmarks(inferences, limbs),
+                child: !cameraController!.value.isInitialized
+                    ? Container()
+                    : AspectRatio(
+                  aspectRatio:
+                  cameraController!.value.aspectRatio,
+                  child: CameraPreview(cameraController!),
                 ),
-                Row(
+              ),
+            )
+                : Container(),
+
+            // RotatedBox(
+            //     quarterTurns: 3,
+            //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
+          ),
+          //  Container(height: 100,width: 200,color: Colors.white,)
+          Row(
+            children: [
+              Center(
+                  child: Image.asset(
+                    imgUrl,
+                    height: 100,
+                    width: 150,
+                  )),
+              DefaultTextStyle(
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 25, color: Colors.black),
+                child: Column(
                   children: [
-                    Center(
-                        child: Image.asset(
-                      imgUrl,
-                      height: 100,
-                      width: 150,
-                    )),
-                    DefaultTextStyle(
-                      textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 25, color: Colors.black),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text("Reps: " + doneReps.toString()),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(" / " + reps.toString())
-                            ],
-                          ),
-                          Row(
+                    Row(
+                      children: [
+                        Text("Reps: " + doneReps.toString()),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(" / " + reps.toString())
+                      ],
+                    ),
+                    /* Row(
                             children: [
                               Text("Sets: " + doneSets.toString()),
                               SizedBox(
@@ -337,27 +318,27 @@ class _TestState extends State<Test> {
                               ),
                               Text(" / " + sets.toString())
                             ],
-                          ),
-                          Text(stage == "start"
-                              ? "Starting pose."
-                              : stage == "up"
-                                  ? "Flexion"
-                                  : "Extension")
-                        ],
-                      ),
-                    )
+                         ),*/
+                    Text(stage == "start"
+                        ? "Starting pose."
+                        : stage == "up"
+                        ? "Flexion"
+                        : "Extension")
                   ],
-                )
-              ],
-            )
+                ),
+              )
+            ],
+          )
+        ],
+      )
           : Center(
-              child: Text(
-                "No workouts today. Rest or assign one\nfor this day of the week: " +
-                    jsonHandler.fetchDayToday() +
-                    "day",
-                textAlign: TextAlign.center,
-              ),
-            ),
+        child: Text(
+          "No workouts today. Rest or assign one\nfor this day of the week: " +
+              jsonHandler.fetchDayToday() +
+              "day",
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }
@@ -419,15 +400,6 @@ class RenderLandmarks extends CustomPainter {
   }
   @override
   void paint(Canvas canvas, Size size) {
-    // for (List<int> edge in edges) {
-    //   double vertex1X = inferenceList[edge[0]][0].toDouble() - 70;
-    //   double vertex1Y = inferenceList[edge[0]][1].toDouble() - 30;
-    //   double vertex2X = inferenceList[edge[1]][0].toDouble() - 70;
-    //   double vertex2Y = inferenceList[edge[1]][1].toDouble() - 30;
-    //   canvas.drawLine(
-    //       Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), edge_paint);
-    // }
-
     for (var limb in selectedLandmarks) {
       renderEdge(canvas, limb[0], limb[1]);
     }
@@ -443,9 +415,9 @@ class RenderLandmarks extends CustomPainter {
       if ((point[2] > 0.40) & included.contains(inferenceList.indexOf(point))) {
         isCorrect
             ? points_green
-                .add(Offset(point[0].toDouble() - 70, point[1].toDouble() - 30))
+            .add(Offset(point[0].toDouble() - 70, point[1].toDouble() - 30))
             : points_red.add(
-                Offset(point[0].toDouble() - 70, point[1].toDouble() - 30));
+            Offset(point[0].toDouble() - 70, point[1].toDouble() - 30));
       }
     }
 

@@ -1,5 +1,5 @@
 import 'dart:ffi';
-import '../perform_components/utility.dart';
+import '../utility//angle.dart';
 
 class ExerciseHandler {
   late List<dynamic> limbs;
@@ -8,7 +8,7 @@ class ExerciseHandler {
   late bool isProperForm;
   late bool restart;
   late int doneReps;
-  late int doneSets;
+ // late int doneSets;
 
   late var stage;
   late double angle;
@@ -49,28 +49,11 @@ class ExerciseHandler {
 class DumbellCurlHandler extends ExerciseHandler {
   void init() {
     limbs = [
-      [
-        [7, 5, 11],
-        false,
-        5,
-        25
-      ],
-      [
-        [5, 11, 13],
-        false,
-        170,
-        180
-      ],
-    ];
-    targets = [
-      [
-        [5, 7, 9],
-        false
-      ],
-    ];
+      [[7, 5, 11], false, 5, 25], [[5, 11, 13], false, 170, 180],];
+
+    targets = [[[5, 7, 9], false],];
 
     doneReps = 0;
-    doneSets = 0;
     angle = 0;
     stage = "start";
     restart = true;
@@ -139,7 +122,7 @@ class FrontLateralRaiseHandler extends ExerciseHandler {
     ];
 
     doneReps = 0;
-    doneSets = 0;
+    //doneSets = 0;
     angle = 0;
     stage = "start";
     restart = true;
@@ -240,7 +223,7 @@ class ShoulderPressHandler extends ExerciseHandler {
     ];
 
     doneReps = 0;
-    doneSets = 0;
+  //  doneSets = 0;
     angle = 0;
     stage = "start";
     restart = true;

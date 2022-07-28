@@ -23,15 +23,16 @@ class _ManageWorkoutState extends State<ManageWorkout> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(),
-                      Padding(
+                      const Padding(
                           padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
                           child: Text('Manage workouts')),
-                      Image.asset('assets/img/shoulder_press_icon.png',
+                      const SizedBox(
                           width: 35, height: 35)
                     ],
                   ),
                   backgroundColor: Colors.black,
-                  bottom: TabBar(
+                  bottom: const TabBar(
+                    indicatorColor: Colors.orange,
                     tabs: [
                       Tab(
                         text: 'Workouts',

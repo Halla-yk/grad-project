@@ -17,12 +17,14 @@ class SetRepetitions extends StatefulWidget {
 class _SetRepetitionsState extends State<SetRepetitions> {
   List<Exercise> selected_cards;
 
-  void onSliderChange(int RepsOrSets, double value, Exercise exercise) {
+  void onSliderChange(int RepsOrSets, Exercise exercise) {
     final indexOfExercise = selected_cards.indexOf(exercise);
     setState(() {
-      RepsOrSets == 0
-          ? selected_cards[indexOfExercise].reps = value.round()
-          : selected_cards[indexOfExercise].sets = value.round();
+      if(RepsOrSets == 0){
+        selected_cards[indexOfExercise].reps++;
+      }
+
+          //: selected_cards[indexOfExercise].sets = value.round();
     });
   }
 
@@ -34,7 +36,7 @@ class _SetRepetitionsState extends State<SetRepetitions> {
     // Resetting rep and set counters
     for (Exercise exercise in selected_cards) {
       exercise.reps = 1;
-      exercise.sets = 1;
+   //   exercise.sets = 1;
     }
   }
 
@@ -63,10 +65,10 @@ class _SetRepetitionsState extends State<SetRepetitions> {
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
-                  Text(" Set exercise sets and repetitions",
+                  const Text(" Set exercise sets and repetitions",
                       textAlign: TextAlign.center,
                       style: TextStyle(fontFamily: 'Roboto', fontSize: 25)),
                   Container(
@@ -77,15 +79,63 @@ class _SetRepetitionsState extends State<SetRepetitions> {
                           Container(
                               child: Row(
                             children: [
-                              Center(
-                                  child: Image.asset(exercise.exercise_image,
-                                      height: 200, width: 150)),
-                              SliderTheme(
-                                data: SliderThemeData(trackHeight: 5),
+
+                              Container(
+                                height: 150,
+                                width: 120,
+                                margin: EdgeInsets.only(left: 20,bottom: 20,top: 20),
                                 child: Column(
                                   children: [
+                                    SizedBox(height: 10,),
+                                    Center(
+                                      child: Image.asset(
+                                        exercise.exercise_image,
+                                        height: 100,
+                                        width: 100,
+                                      ),
+                                    ),
+                                    Container(
+                                        margin: EdgeInsets.all(10),
+                                        child: Text(
+                                          exercise.exercise_displayName,
+                                          style:
+                                          const TextStyle(fontWeight: FontWeight.bold,fontSize: 10),
+                                        ))
+                                  ],
+                                ),
+
+                                decoration:  BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                      width: 2, color: const Color(0xFFC7EDF1)),
+                                ),
+                              ),
+                              Column(
+                                  children: [
+
                                     Row(
                                       children: [
+
+                                        MaterialButton(
+
+                                          onPressed: () {
+                                            final indexOfExercise = selected_cards.indexOf(exercise);
+                                            setState(() {
+                                                if(selected_cards[indexOfExercise].reps != 0){
+                                                  selected_cards[indexOfExercise].reps--;
+                                                }
+                                            });
+                                          },
+
+                                          color: Colors.orange,
+                                          textColor: Colors.white,
+                                          child: Icon(
+                                            Icons.remove,
+                                            size: 24,
+                                          ),
+                                          padding: EdgeInsets.all(16),
+                                          shape: CircleBorder(),
+                                        ),
                                         Column(children: [
                                           Text('Reps'),
                                           Text(exercise.reps.toInt().toString(),
@@ -93,42 +143,25 @@ class _SetRepetitionsState extends State<SetRepetitions> {
                                                   fontFamily: 'Roboto',
                                                   fontSize: 30)),
                                         ]),
-                                        SizedBox(
-                                          width: 140,
-                                          child: Slider(
-                                              value: exercise.reps.toDouble(),
-                                              min: 1,
-                                              max: 30,
-                                              onChanged: (value) =>
-                                                  onSliderChange(
-                                                      0, value, exercise)),
+                                        MaterialButton(
+                                          onPressed: () {
+                                            onSliderChange(0,  exercise);
+                                          },
+                                          color: Colors.orange,
+                                          textColor: Colors.white,
+                                          child: Icon(
+                                            Icons.add,
+                                            size: 24,
+                                          ),
+                                          padding: EdgeInsets.all(16),
+                                          shape: CircleBorder(),
                                         )
                                       ],
                                     ),
-                                    Row(
-                                      children: [
-                                        Column(children: [
-                                          Text('Sets'),
-                                          Text(exercise.sets.toInt().toString(),
-                                              style: TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 30)),
-                                        ]),
-                                        SizedBox(
-                                          width: 140,
-                                          child: Slider(
-                                              value: exercise.sets.toDouble(),
-                                              min: 1,
-                                              max: 30,
-                                              onChanged: (value) =>
-                                                  onSliderChange(
-                                                      1, value, exercise)),
-                                        )
-                                      ],
-                                    )
+
                                   ],
                                 ),
-                              )
+
                             ],
                           ))
                       ],
@@ -136,29 +169,25 @@ class _SetRepetitionsState extends State<SetRepetitions> {
                   ),
                 ]),
           ),
-          Positioned(
-              bottom: 20,
-              right: 10,
-              child: FloatingActionButton(
-                  onPressed: () => Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                            pageBuilder: (context, animation1, animation2) =>
-                                OrderWorkout(selected_cards: selected_cards),
-                            transitionDuration: Duration(seconds: 0),
-                            reverseTransitionDuration: Duration.zero),
-                      ).then((value) {
-                        setState(() {});
-                      }),
-                  backgroundColor: Colors.black,
-                  child: Center(
-                      child: Image.asset(
-                    'assets/img/add_icon.png',
-                    height: 20,
-                    width: 20,
-                  ))))
+
         ]),
       ),
+      bottomNavigationBar:  MaterialButton(
+        height: 60,
+        minWidth: 100,
+        onPressed: () => Navigator.push(
+          context,
+          PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) =>
+                  OrderWorkout(selected_cards: selected_cards),
+              transitionDuration: Duration(seconds: 0),
+              reverseTransitionDuration: Duration.zero),
+        ).then((value) {
+          setState(() {});
+        }),
+        color: Colors.black,
+        textColor: Colors.white,
+        child: const Text('Next',style: TextStyle(fontSize: 25)))
     );
   }
 }

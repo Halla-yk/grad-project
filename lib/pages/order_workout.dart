@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../components/shared/exerciseItem.dart';
-import '../components/shared/json_handler.dart';
+import '../components/shared/local_storage.dart';
 
 class OrderWorkout extends StatefulWidget {
   List<Exercise> selected_cards;
@@ -19,7 +19,7 @@ class _OrderWorkoutState extends State<OrderWorkout> {
   List<Exercise> selected_cards;
   late int selected_cardsNo;
 
-  late JsonHandler jsonHandler;
+  late LocalStorage jsonHandler;
 
   // UNCOMMENT
 
@@ -45,7 +45,7 @@ class _OrderWorkoutState extends State<OrderWorkout> {
   }
 
   initAsync() async {
-    jsonHandler = JsonHandler();
+    jsonHandler = LocalStorage();
     await jsonHandler.init();
 
     jsonHandler.workoutfileExists
@@ -99,20 +99,15 @@ class _OrderWorkoutState extends State<OrderWorkout> {
               ),
             ],
           ),
-          Positioned(
-              bottom: 20,
-              right: 10,
-              child: FloatingActionButton(
-                  onPressed: () => SaveWorkouts(),
-                  backgroundColor: Colors.black,
-                  child: Center(
-                      child: Image.asset(
-                    'assets/img/add_icon.png',
-                    height: 20,
-                    width: 20,
-                  ))))
         ]),
       ),
+        bottomNavigationBar:  MaterialButton(
+            height: 60,
+            minWidth: 100,
+            onPressed: () => SaveWorkouts(),
+            color: Colors.black,
+            textColor: Colors.white,
+            child: const Text('Next',style: TextStyle(fontSize: 25),))
     );
   }
 
@@ -126,9 +121,9 @@ class _OrderWorkoutState extends State<OrderWorkout> {
         ),
         trailing: Text(
             ' Reps: ' +
-                exercise.reps.toString() +
-                ' Sets: ' +
-                exercise.sets.toString(),
+                exercise.reps.toString() ,
+             //   ' Sets: ' +
+            //    exercise.sets.toString(),
             style: TextStyle(fontFamily: 'Roboto', fontSize: 16)),
       );
 

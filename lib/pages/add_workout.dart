@@ -14,9 +14,9 @@ class AddWorkout extends StatefulWidget {
 class _AddWorkoutState extends State<AddWorkout> {
   late double card_height;
   late double card_width;
-
-// Inefficient/ugly way of doing this, but for 3 selectable exercises, it would do
-// TODO (potentially): Change into dynamic exeercise selection
+  bool isSelected1 = false;
+  bool isSelected2 = false;
+  bool isSelected3 = false;
 
   List<Exercise> includedExercises = [];
 
@@ -40,6 +40,50 @@ class _AddWorkoutState extends State<AddWorkout> {
     });
   }
 
+  Widget workoutCard(exercisesName,exercisesImage,text){
+    return  Container(
+      height: 180,
+      width: 150,
+      child: InkWell(
+        onTap: () {
+
+          onSelect(Exercises[exercisesName]);
+        },
+        child: Column(
+          children: [
+            SizedBox(height: 10,),
+            Center(
+              child: Image.asset(
+                exercisesImage,
+                height: 120,
+                width: 110,
+              ),
+            ),
+            Container(
+                margin: EdgeInsets.all(10),
+                child: Text(
+                  text,
+                  style:
+                  const TextStyle(fontWeight: FontWeight.bold),
+                ))
+          ],
+        ),
+      ),
+      decoration: includedExercises
+          .contains(Exercises[exercisesName])
+          ? BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        border:
+        Border.all(width: 2, color: Colors.orange),
+      )
+          : BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+            width: 2, color: const Color(0xFFC7EDF1)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,126 +92,47 @@ class _AddWorkoutState extends State<AddWorkout> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(),
-            Padding(
+            const Padding(
                 padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
                 child: Text('Manage workouts')),
-            Image.asset('assets/img/shoulder_press_icon.png',
-                width: 35, height: 35)
+            const SizedBox(width: 35, height: 35)
           ],
         ),
         backgroundColor: Colors.black,
       ),
       body: Container(
+        color: Colors.white,
         child: Stack(
           children: [
-            Positioned(
-                top: 50,
+            const Positioned(
+                top: 30,
                 left: 40,
                 child: Text(
-                  'Select exercises to include\n         in your workout',
-                  style: TextStyle(fontFamily: 'Roboto', fontSize: 25),
+                  'Select exercises to include\n        in your workout',
+                  style: TextStyle( fontSize: 25),
                 )),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        child: InkWell(
-                          onTap: () => onSelect(Exercises["dumbell_curl"]),
-                          child: Container(
-                            child: Center(
-                              child: Image.asset(
-                                'assets/img/card_dumbellcurl.png',
-                                height: card_height,
-                                width: card_width,
-                              ),
-                            ),
-                          ),
-                        ),
-                        decoration: includedExercises
-                                .contains(Exercises["dumbell_curl"])
-                            ? BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.green,
-                                      blurRadius: 6.0,
-                                      spreadRadius: 0.0,
-                                      offset: Offset(
-                                        0.0,
-                                        3.0,
-                                      ),
-                                    ),
-                                  ])
-                            : null,
-                      ),
-                      Container(
-                        child: InkWell(
-                          onTap: () => onSelect(Exercises["lateral_raise"]),
-                          child: Center(
-                            child: Image.asset(
-                                'assets/img/card_lateralraise.png',
-                                height: card_height,
-                                width: card_width),
-                          ),
-                        ),
-                        decoration: includedExercises
-                                .contains(Exercises["lateral_raise"])
-                            ? BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.green,
-                                      blurRadius: 6.0,
-                                      spreadRadius: 0.0,
-                                      offset: Offset(
-                                        0.0,
-                                        3.0,
-                                      ),
-                                    ),
-                                  ])
-                            : null,
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        child: InkWell(
-                          onTap: () => onSelect(Exercises["shoulder_press"]),
-                          child: Center(
-                            child: Image.asset(
-                                'assets/img/card_shoulderpress.png',
-                                height: card_height,
-                                width: card_width),
-                          ),
-                        ),
-                        decoration: includedExercises
-                                .contains(Exercises["shoulder_press"])
-                            ? BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.green,
-                                      blurRadius: 6.0,
-                                      spreadRadius: 0.0,
-                                      offset: Offset(
-                                        0.0,
-                                        3.0,
-                                      ),
-                                    ),
-                                  ])
-                            : null,
-                      )
-                    ],
-                  )
-                ],
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 30,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    workoutCard('dumbell_curl','assets/img/dumbbell_curl.PNG','Dumbbell Curl'),
+                    const SizedBox(
+                      width: 30,
+                    ),
+                    workoutCard('lateral_raise','assets/img/front_lateral_raise.PNG','Front Lateral Raise'),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    workoutCard('shoulder_press','assets/img/shoulder_press.PNG','Shoulder Press'),
+                  ],
+                )
+              ],
             ),
             Positioned(
                 bottom: 20,
@@ -175,23 +140,23 @@ class _AddWorkoutState extends State<AddWorkout> {
                 child: FloatingActionButton(
                     onPressed: includedExercises.length != 0
                         ? () => Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                  pageBuilder: (context, animation1,
-                                          animation2) =>
-                                      SetRepetitions(
-                                          selected_cards: includedExercises),
-                                  transitionDuration: Duration(seconds: 0),
-                                  reverseTransitionDuration: Duration.zero),
-                            )
+                      context,
+                      PageRouteBuilder(
+                          pageBuilder: (context, animation1,
+                              animation2) =>
+                              SetRepetitions(
+                                  selected_cards: includedExercises),
+                          transitionDuration: Duration(seconds: 0),
+                          reverseTransitionDuration: Duration.zero),
+                    )
                         : null,
                     backgroundColor: Colors.black,
                     child: Center(
                         child: Image.asset(
-                      'assets/img/add_icon.png',
-                      height: 20,
-                      width: 20,
-                    ))))
+                          'assets/img/add_icon.png',
+                          height: 20,
+                          width: 20,
+                        ))))
           ],
         ),
       ),

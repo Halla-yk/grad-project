@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'exerciseItem.dart';
 
-class JsonHandler {
+class LocalStorage {
   late Directory dir;
 
   late File workoutJsonFile;
@@ -22,15 +22,8 @@ class JsonHandler {
   Map<String, dynamic> weekSchedule = {};
 
   Future<void> init() async {
-    print("\n \n \nInitializing...");
 
     dir = await getApplicationDocumentsDirectory();
-
-    // getApplicationDocumentsDirectory().then((Directory directory) {
-    //   dir = directory;
-
-    //   print("\n \n \nFinished");
-    // });
 
     print("\n \n \nPATH: " + dir.path + "/");
 
@@ -43,11 +36,9 @@ class JsonHandler {
     workoutfileExists = workoutJsonFile.existsSync();
     weekFileExists = weekJsonFile.existsSync();
 
-    print("FINISHED ");
   }
 
   Future<void> fetchWorkouts() async {
-    print("\n \n \nFetching workouts: ");
     workoutfileExists = workoutJsonFile.existsSync();
     workoutfileExists
         ? workouts = json.decode(workoutJsonFile.readAsStringSync())
@@ -55,14 +46,10 @@ class JsonHandler {
   }
 
   Future<void> fetchWeekSchedule() async {
-    print("\n \n \nFetching routine: ");
     weekSchedule = json.decode(weekJsonFile.readAsStringSync());
-    // weekJsonFile.delete();
-    // print("EXISTS? " + weekJsonFile.existsSync().toString());
   }
 
   void createWorkoutFile() {
-    print("\n \n \nCreating workout file");
     workoutJsonFile.createSync();
     workoutfileExists = true;
     workoutJsonFile.writeAsStringSync("[]");
@@ -77,7 +64,6 @@ class JsonHandler {
         "exercise_image": exercise.exercise_image,
         "exercise_displayName": exercise.exercise_displayName,
         "reps": exercise.reps,
-        "sets": exercise.sets
       });
     }
     content.add({
@@ -86,7 +72,6 @@ class JsonHandler {
     });
     workoutJsonFile.writeAsStringSync(jsonEncode(content));
     print("\n-------------- CONTENT ----------------\n" + content.toString());
-    // jsonFile.delete();
   }
 
   void createWeekFile() {
@@ -123,21 +108,14 @@ class JsonHandler {
         newWorkouts.add({
           "workout_no": "Workout " + index.toString(),
           "workout_list": workout["workout_list"]
-        });
-      }
-    }
+        });}}
     workoutJsonFile.writeAsStringSync(jsonEncode(newWorkouts));
     workouts = newWorkouts;
-
     int indexOfDeleted = int.parse(toDelete.substring(toDelete.length - 1));
-
     for (var day in weekSchedule.keys) {
-      // print(day + " | " + weekSchedule[day]);
       weekSchedule[day] == toDelete ? writeToWeekFile("", day) : null;
     }
-
     for (var day in weekSchedule.keys) {
-      // print(day + " | " + weekSchedule[day]);
       weekSchedule[day] != ""
           ? int.parse(weekSchedule[day].substring(toDelete.length - 1)) >
                   indexOfDeleted
@@ -147,10 +125,8 @@ class JsonHandler {
               : null
           : null;
     }
-    // weekJsonFile.delete();
-
-    // printWrapped(json.decode(weekJsonFile.readAsStringSync()));
   }
+
 
   String fetchDayToday() {
     dayToday = DateTime.now();

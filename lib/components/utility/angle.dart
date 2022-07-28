@@ -11,3 +11,4 @@ double getAngle(List<int> pointA, List<int> pointB, List<int> pointC) {
 
   return angle;
 }
+
